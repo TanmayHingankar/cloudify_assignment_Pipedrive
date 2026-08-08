@@ -1,12 +1,12 @@
 # Dependencies
 node_modules/
 
-# Build output
+# TypeScript build output
 dist/
 
 # Environment variables
 .env
 
-# Logs
+# Runtime logs
+logs/
 *.log
-
