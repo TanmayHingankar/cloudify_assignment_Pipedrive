@@ -51,8 +51,8 @@ export interface PipedrivePerson {
   lost_deals_count: number;
   related_lost_deals_count: number;
   active_flag: boolean;
-  phone: PipedriveContactInfo[];
-  email: PipedriveContactInfo[];
+  phones: PipedriveContactInfo[];
+  emails: PipedriveContactInfo[];
   first_char: string;
   update_time: string;
   delete_time: string | null;
