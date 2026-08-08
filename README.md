@@ -19,7 +19,6 @@ PIPEDRIVE_API_KEY=your_api_key
 PIPEDRIVE_COMPANY_DOMAIN=your_company_domain
 ```
 
-> Keep `.env` private and do not commit it to the repository.
 
 ### 3. Build and run
 
