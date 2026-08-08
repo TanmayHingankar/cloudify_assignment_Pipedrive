@@ -11,11 +11,11 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 type Mapping = { pipedriveKey: string; inputKey: string };
 
 const API_KEY = process.env.PIPEDRIVE_API_KEY;
-const DOMAIN  = process.env.PIPEDRIVE_COMPANY_DOMAIN; // e.g., "beauty-sandbox"
+const DOMAIN  = process.env.PIPEDRIVE_COMPANY_DOMAIN; 
 if (!API_KEY || !DOMAIN) {
   throw new Error("Missing env vars: PIPEDRIVE_API_KEY or PIPEDRIVE_COMPANY_DOMAIN");
 }
-const BASE = `https://${DOMAIN}.pipedrive.com/v1`;
+const BASE = `https://${DOMAIN}.pipedrive.com/api/v2`;
 
 
 const get = (obj: any, pathStr: string) =>
@@ -75,11 +75,13 @@ export const syncPdPerson = async (): Promise<PipedrivePerson> => {
   );
 
   if (payload.email && !Array.isArray(payload.email)) {
-    payload.email = [{ value: payload.email, primary: true }];
-  }
+  payload.emails = [{ value: payload.email, primary: true }];
+  delete payload.email;
+}
   if (payload.phone && !Array.isArray(payload.phone)) {
-    payload.phone = [{ value: payload.phone, primary: true }];
-  }
+  payload.phones = [{ value: payload.phone, primary: true }];
+  delete payload.phone;
+}
 
   const nameKey = (mappings as Mapping[]).find(m => m.pipedriveKey === "name")?.inputKey;
   const nameVal = nameKey ? get(inputData, nameKey) : undefined;
@@ -93,16 +95,17 @@ export const syncPdPerson = async (): Promise<PipedrivePerson> => {
     let person: PipedrivePerson;
     if (existing?.id) {
       const upd = await withRetry(() =>
-        axios.put(`${BASE}/persons/${existing.id}`, payload, { params: { api_token: API_KEY } })
+        axios.patch(
+  `${BASE}/persons/${existing.id}`, payload, { params: { api_token: API_KEY } })
       );
       person = upd.data.data as PipedrivePerson;
-      console.log(`✅ Updated person id=${existing.id} (${nameVal})`);
+      console.log(`Updated person id=${existing.id} (${nameVal})`);
     } else {
       const crt = await withRetry(() =>
         axios.post(`${BASE}/persons`, payload, { params: { api_token: API_KEY } })
       );
       person = crt.data.data as PipedrivePerson;
-      console.log(`🆕 Created person id=${(person as any)?.id} (${nameVal})`);
+      console.log(`Created person id=${(person as any)?.id} (${nameVal})`);
     }
 
     await logPerson(person);
@@ -122,6 +125,6 @@ export const syncPdPerson = async (): Promise<PipedrivePerson> => {
 
 if (require.main === module) {
   syncPdPerson()
-    .then(p => console.log("✔ Synced:", { id: (p as any)?.id, name: (p as any)?.name }))
+    .then(p => console.log("Synced:", { id: (p as any)?.id, name: (p as any)?.name }))
     .catch(e => { console.error(e.message); process.exit(1); });
 }
